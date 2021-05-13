@@ -3,8 +3,8 @@ import json
 import os
 import base64
 
-from Server.lib.api import json_res
-import Server.lib.Oprater as Oprater
+from lib.api import json_res
+import lib.Oprater as Oprater
 
 
 conf = json.load(open('config.json'))
