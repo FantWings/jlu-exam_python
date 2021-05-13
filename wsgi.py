@@ -1,9 +1,9 @@
 from flask import Flask
 from flask_cors import CORS
 
-from Server.config import Config
-from Server.lib.sql import db
-from Server.App import api
+from config import Config
+from lib.sql import db
+from App import api
 
 app = Flask(__name__)
 app.config.from_object(Config)

@@ -1,10 +1,10 @@
 import json
 from sqlalchemy import func
 
-from Server.lib.sql import db
-from Server.lib.model import Paper
-from Server.lib.api import json_res
-from Server.lib.Answers import getAnswers
+from lib.sql import db
+from lib.model import Paper
+from lib.api import json_res
+from lib.Answers import getAnswers
 
 
 def addPapers(paper_data):

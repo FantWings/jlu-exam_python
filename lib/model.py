@@ -1,4 +1,4 @@
-from Server.lib.sql import db
+from lib.sql import db
 from datetime import datetime
 
 
