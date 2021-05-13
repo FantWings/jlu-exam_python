@@ -107,10 +107,7 @@ class Select:
         return answers
 
     def combound(self):
-        answers = {
-            "fill_in": [],
-            "read_understand": []
-        }
+        answers = {"fill_in": [], "read_understand": []}
         for content in self.question['combound']:
             i = len(content)
             for key, value in enumerate(content):
@@ -135,10 +132,7 @@ class Select:
 
 
 def judge(question):
-    answer_dict = {
-        "1": "对",
-        "2": "错"
-    }
+    answer_dict = {"1": "对", "2": "错"}
     answers = []
     for key, value in enumerate(question['judge']):
         key = key + 1

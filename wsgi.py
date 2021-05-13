@@ -1,13 +1,16 @@
 from flask import Flask
 from flask_cors import CORS
 
-from config import Config
-from lib.sql import db
-from App import api
+from settings import Config
+from sql.model import db
+from routes.api import api
 
 app = Flask(__name__)
 app.config.from_object(Config)
-db.init_app(app)
+
+with app.app_context():
+    db.init_app(app)
+    db.create_all()
 
 CORS(app, supports_credentials=True)
 

@@ -1,10 +1,10 @@
 import json
 from sqlalchemy import func
 
-from lib.sql import db
-from lib.model import Paper
-from lib.api import json_res
-from lib.Answers import getAnswers
+from sql.model import db
+from sql.tables.t_paper import Paper
+from lib.response import json_res
+from lib.answer import getAnswers
 
 
 def addPapers(paper_data):
@@ -26,16 +26,14 @@ def addPapers(paper_data):
             try:
                 answers = getAnswers(paper_data)
             except Exception:
-                return json_res(msg='你输入的试卷数据不正确或试卷数据不完整，解析失败！',
-                                code=1)
+                return json_res(msg='你输入的试卷数据不正确或试卷数据不完整，解析失败！', code=1)
 
             # 将试卷号、提交者IP地址、原试卷数据、答案数据写入数据库
-            new_paper = Paper(
-                id=paper_id,
-                submit_ip=paper_data['data']['sourceIp'],
-                original=json.dumps(paper_data['data']['questions']),
-                answer=json.dumps(answers)
-                )
+            new_paper = Paper(id=paper_id,
+                              submit_ip=paper_data['data']['sourceIp'],
+                              original=json.dumps(
+                                  paper_data['data']['questions']),
+                              answer=json.dumps(answers))
 
             db.session.add(new_paper)
             db.session.commit()
@@ -48,8 +46,7 @@ def addPapers(paper_data):
 
     paper.used_count = Paper.used_count + 1
     db.session.commit()
-    return json_res(data=paper_id,
-                    msg="答案已在数据库中，直接从数据库中返回答案数据")
+    return json_res(data=paper_id, msg="答案已在数据库中，直接从数据库中返回答案数据")
 
 
 def getPapers(paper_id, user_token):
@@ -128,10 +125,10 @@ def getPaperList(limit, index):
     """
     results = Paper.query.order_by(
         Paper.submit_time.desc()).limit(limit).offset(
-        (index - 1) * limit).with_entities(
-        Paper.id,
-        Paper.paper_name,
-        func.date_format(Paper.submit_time, "%Y年%m月%d日 %H时%i分%s秒")).all()
+            (index - 1) * limit).with_entities(
+                Paper.id, Paper.paper_name,
+                func.date_format(Paper.submit_time,
+                                 "%Y年%m月%d日 %H时%i分%s秒")).all()
     total = Paper.query.count()
     data = []
     for result in results:

@@ -1,13 +1,10 @@
-from flask import Blueprint, request, make_response, session
-import json
+from flask import Blueprint, request, make_response, session, current_app
 import os
 import base64
 
-from lib.api import json_res
-import lib.Oprater as Oprater
+from lib.response import json_res
+import lib.db as Oprater
 
-
-conf = json.load(open('config.json'))
 api = Blueprint('api', __name__)
 
 
@@ -26,10 +23,7 @@ def get_state():
     返回程序被使用次数，用户登录态
     """
     isAuthed = session.get('authed')
-    state = {
-        'count': Oprater.getPaperCount(),
-        'authed': isAuthed
-        }
+    state = {'count': Oprater.getPaperCount(), 'authed': isAuthed}
     return make_response(json_res(data=state))
 
 
@@ -55,10 +49,10 @@ def paper(paper_id):
         # 获取前端传来的JSON数据
         submit_info = request.get_json()
         # 验证Token是否正确
-        if submit_info["token"] == conf['token'] or session.get('authed'):
+        if submit_info["token"] == current_app.config[
+                'EXEC_TOKEN'] or session.get('authed'):
             # 将问卷数据交给答案处理函数，并保存返回值
-            answers = Oprater.addPapers(
-                submit_info['question_data'])
+            answers = Oprater.addPapers(submit_info['question_data'])
 
             # 判断用户是否带了Token，没有则随机生成一个给他
             token = session.get('token')
@@ -75,8 +69,7 @@ def paper(paper_id):
             return make_response(answers)
         # 验证失败，返回原因给前端
         else:
-            return make_response(
-                json_res(msg='密钥不正确，请重新输入正确的密钥！', code=1))
+            return make_response(json_res(msg='密钥不正确，请重新输入正确的密钥！', code=1))
 
 
 @api.route('/paper/setPaperName', methods=['POST'])
@@ -85,8 +78,7 @@ def remane():
     试卷名称修改接口，处理用户的试卷名称更新请求
     """
     submit = request.get_json()
-    result = Oprater.setPaperName(submit['paper_id'],
-                                  submit['new_name'],
+    result = Oprater.setPaperName(submit['paper_id'], submit['new_name'],
                                   session.get('token'))
     return make_response(result, result['code'])
 
