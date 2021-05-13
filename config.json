@@ -1,9 +1,0 @@
-{
-  "token": "test",
-  "use_sql": true,
-  "sql_hostname": "dev.mysql.furry.lan",
-  "sql_database": "jlu_helper",
-  "sql_username": "root",
-  "sql_password": "KXTG3hhEXBq92vd8",
-  "sql_port": "3306"
-}
