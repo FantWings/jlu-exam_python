@@ -16,6 +16,11 @@ def before_request():
     session.permanent = True
 
 
+@api.route('/ping')
+def ping_check():
+    return make_response('Pong')
+
+
 @api.route('/getState', methods=["GET"])
 def get_state():
     """
