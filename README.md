@@ -38,26 +38,37 @@
 ### 运行后端（下列二选其一）
 
 1. **直接运行**
-  - 请确保系统内安装了 3.X 或以上的 Python 版本，使用`python -v`查看 Python 版本。
-  - 在根目录执行`pip install Server/requirements.txt`安装 flask 所需要的扩展
-    - 注意 mysqlclient 需要依赖 mysql-config，如果你是 Ubuntu/Debian 系统，请注意安装 libmysqlclient-dev
-  - 使用`cp .config config`命令将模板复制成一份可用的配置文件，并修改里面的 token 字段为你想要的 token（越长越好），这个是对应页面的执行密钥
-  - 运行 `flask run`启动开发后端。
-    - 默认监听 127.0.0.1:5000，如果需要任意网络访问请使用参数-h 0.0.0.0（安全角度非常不建议）
-  - 运行`uwsgi --socket 0.0.0.0:5000 --protocol=http -p 3 -w wsgi:app` 启动生产环境后端。
-    - 建议配合 NGINX 来启动后端更为安全。
+
+- 请确保系统内安装了 3.X 或以上的 Python 版本，使用`python -v`查看 Python 版本。
+- 在根目录执行`pip install Server/requirements.txt`安装 flask 所需要的扩展
+  - 注意 mysqlclient 需要依赖 mysql-config，如果你是 Ubuntu/Debian 系统，请注意安装 libmysqlclient-dev
+- 使用拷贝下列命令，配置环境变量，设置服务端链接数据库的方式（注意该方法为临时方法，终端关闭后会失效，如有需要，请写入到 bashrc 等位置使其永久生效）：
+
+```bash
+export SQL_HOST="<数据库IP地址>" \
+export SQL_USER="<数据库用户名>" \
+export SQL_PASS="<数据库密码>" \
+export SQL_BASE="<数据库名称>" \
+export SQL_PORT="<数据库端口号，默认3306>"
+```
+
+- 运行 `flask run`启动开发后端。
+  - 默认监听 127.0.0.1:5000，如果需要任意网络访问请使用参数-h 0.0.0.0（安全角度非常不建议）
+- 运行`uwsgi --socket 0.0.0.0:5000 --protocol=http -p 3 -w wsgi:app` 启动生产环境后端。
+  - 建议配合 NGINX 来启动后端更为安全。
 
 2. **Docker**
-  - 请先安装Docker运行时
-  - 复制下列命令，替换文本，在终端粘贴直接运行：
- ```bash
- sudo docker run -d --name jlu_helper \
-        -e SQL_HOST=<数据库IP地址> \
-        -e SQL_BASE=<数据库名称> \
-        -e SQL_USER=<数据库用户名> \
-        -e SQL_PASS=<数据库密码> \
-        -e SQL_PORT=<数据库端口号，默认3306> \
-        -e EXEC_TOKEN=<执行密钥> \
-        -p 9000:9090 \
-        fantwings/jlu-helper:latest
- ```
+
+- 请先安装 Docker 运行时
+- 复制下列命令，替换文本，在终端粘贴直接运行：
+
+```bash
+sudo docker run -d --name jlu_helper \
+       -e SQL_HOST=<数据库IP地址> \
+       -e SQL_BASE=<数据库名称> \
+       -e SQL_USER=<数据库用户名> \
+       -e SQL_PASS=<数据库密码> \
+       -e SQL_PORT=<数据库端口号，默认3306> \
+       -p 9000:9090 \
+       fantwings/jlu-helper:latest
+```
