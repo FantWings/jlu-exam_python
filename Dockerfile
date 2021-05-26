@@ -24,7 +24,6 @@ ENV SQL_PASS=password
 ENV SQL_HOST=hostname
 ENV SQL_PORT=3306
 ENV SQL_BASE=basename
-ENV EXEC_TOKEN=token
 ENV FLASK_ENV=production
 
 EXPOSE 9090

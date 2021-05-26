@@ -38,43 +38,31 @@ def paper(paper_id):
     试卷处理接口
     """
     if request.method == "GET":
-        # 验证用户是否已经处于登录状态
-        # if session.get('authed'):
         # 获取试卷数据
         answers = Oprater.getPapers(paper_id, session.get('token'))
         # 处理完成，返回答案数据给前端
         return make_response(answers)
-        # else:
-        #     return make_response(json_res(
-        #         False,
-        #         msg='Token丢失或无效，请返回主页并刷新页面再试！'
-        #         ), 401)
 
     if request.method == "POST":
         # 获取前端传来的JSON数据
         submit_info = request.get_json()
-        # 验证Token是否正确
-        if submit_info["token"] == current_app.config[
-                'EXEC_TOKEN'] or session.get('authed'):
-            # 将问卷数据交给答案处理函数，并保存返回值
-            answers = Oprater.addPapers(submit_info['question_data'])
 
-            # 判断用户是否带了Token，没有则随机生成一个给他
-            token = session.get('token')
-            if token is None:
-                token = base64.b64encode(os.urandom(16)).decode('ascii')
-                session['token'] = token
-            # 更新这张试卷的所有者
-            Oprater.updatePaperOwner(paper_id, token)
+        # 将问卷数据交给答案处理函数，并保存返回值
+        answers = Oprater.addPapers(submit_info['question_data'])
 
-            # 为这个用户设置已登录标识，后续无需再让其输入执行token
-            session['authed'] = True
+        # 判断用户是否带了Token，没有则随机生成一个给他
+        token = session.get('token')
+        if token is None:
+            token = base64.b64encode(os.urandom(16)).decode('ascii')
+            session['token'] = token
+        # 更新这张试卷的所有者
+        Oprater.updatePaperOwner(paper_id, token)
 
-            # 处理完成，返回试卷号给前端
-            return make_response(answers)
-        # 验证失败，返回原因给前端
-        else:
-            return make_response(json_res(msg='密钥不正确，请重新输入正确的密钥！', code=1))
+        # 为这个用户设置已登录标识，后续无需再让其输入执行token
+        session['authed'] = True
+
+        # 处理完成，返回试卷号给前端
+        return make_response(answers)
 
 
 @api.route('/paper/setPaperName', methods=['POST'])

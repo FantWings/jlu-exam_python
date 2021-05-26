@@ -18,6 +18,3 @@ class Config(object):
 
     # 设置SESSION有效期
     PERMANENT_SESSION_LIFETIME = timedelta(days=31)
-
-    # 执行密钥
-    EXEC_TOKEN = os.getenv('EXEC_TOKEN')
