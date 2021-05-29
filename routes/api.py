@@ -1,19 +1,9 @@
-from flask import Blueprint, request, make_response, session, current_app
-import os
-import base64
+from flask import Blueprint, request, make_response
 
 from lib.response import json_res
 import lib.db as Oprater
 
 api = Blueprint('api', __name__)
-
-
-@api.before_request
-def before_request():
-    """
-    设置用户Session有效期
-    """
-    session.permanent = True
 
 
 @api.route('/ping')
@@ -25,10 +15,9 @@ def ping_check():
 def get_state():
     """
     状态接口，承接前端第一次请求
-    返回程序被使用次数，用户登录态
+    返回程序被使用次数
     """
-    isAuthed = session.get('authed')
-    state = {'count': Oprater.getPaperCount(), 'authed': isAuthed}
+    state = {'count': Oprater.getPaperCount()}
     return make_response(json_res(data=state))
 
 
@@ -37,31 +26,24 @@ def paper(paper_id):
     """
     试卷处理接口
     """
+    userIdent = request.headers.get('userIdent', None)
     if request.method == "GET":
         # 获取试卷数据
-        answers = Oprater.getPapers(paper_id, session.get('token'))
+        answers = Oprater.getPapers(paper_id, userIdent)
         # 处理完成，返回答案数据给前端
         return make_response(answers)
 
     if request.method == "POST":
+        if userIdent is None:
+            return make_response(json_res(msg='无效的识别码Header，禁止提交', code=1))
         # 获取前端传来的JSON数据
         submit_info = request.get_json()
-
         # 将问卷数据交给答案处理函数，并保存返回值
-        answers = Oprater.addPapers(submit_info['question_data'])
-
-        # 判断用户是否带了Token，没有则随机生成一个给他
-        token = session.get('token')
-        if token is None:
-            token = base64.b64encode(os.urandom(16)).decode('ascii')
-            session['token'] = token
+        answers = Oprater.addPapers(submit_info['question_data'], userIdent)
         # 更新这张试卷的所有者
-        Oprater.updatePaperOwner(paper_id, token)
-
-        # 为这个用户设置已登录标识，后续无需再让其输入执行token
-        session['authed'] = True
-
+        Oprater.updatePaperOwner(paper_id, userIdent)
         # 处理完成，返回试卷号给前端
+        print(answers)
         return make_response(answers)
 
 
@@ -72,8 +54,8 @@ def remane():
     """
     submit = request.get_json()
     result = Oprater.setPaperName(submit['paper_id'], submit['new_name'],
-                                  session.get('token'))
-    return make_response(result, result['code'])
+                                  request.headers.get('userIdent'))
+    return make_response(result, 200)
 
 
 @api.route('/paper/lists', methods=['GET'])
