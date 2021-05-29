@@ -1,4 +1,5 @@
 import json
+import time
 from sqlalchemy import func
 
 from sql.model import db
@@ -7,11 +8,12 @@ from lib.response import json_res
 from lib.answer import getAnswers
 
 
-def addPapers(paper_data):
+def addPapers(paper_data, userIdent):
     """
     添加一张试卷数据
 
     * paper_data（试卷数据）
+    * userIdent（用户身份识别码）
 
     """
 
@@ -33,28 +35,28 @@ def addPapers(paper_data):
                               submit_ip=paper_data['data']['sourceIp'],
                               original=json.dumps(
                                   paper_data['data']['questions']),
-                              answer=json.dumps(answers))
-
+                              answer=json.dumps(answers),
+                              owner=userIdent)
             db.session.add(new_paper)
             db.session.commit()
 
             # 返回处理结果以及试卷号
-            return json_res(data=paper_id)
+            return json_res(msg='答案处理成功', code=0)
         # 异常处理
         except Exception as e:
-            return json_res(msg=e, code=1)
+            return json_res(msg=str('后端错误：{}'.format(e)), code=1)
 
     paper.used_count = Paper.used_count + 1
     db.session.commit()
-    return json_res(data=paper_id, msg="答案已在数据库中，直接从数据库中返回答案数据")
+    return json_res(msg="答案已在数据库中，直接从数据库中返回答案数据")
 
 
-def getPapers(paper_id, user_token):
+def getPapers(paper_id, userIdent):
     """
     从数据库获取试卷（含答案）
 
     * paper_id（试卷号）
-    * user_token（用户密钥，用于判断这个用户是否是这个试卷的所有者）
+    * userIdent（用户识别码，用于判断这个用户是否是这个试卷的所有者）
     """
 
     paper = Paper.query.get(paper_id)
@@ -66,15 +68,16 @@ def getPapers(paper_id, user_token):
         response = {
             'paper_id': paper.id,
             'paper_name': paper.paper_name,
-            'submit_time': paper.submit_time,
-            'isOwner': user_token == paper.owner,
+            'submit_time':
+            int(time.mktime(paper.submit_time.timetuple())) * 1000,
+            'isOwner': userIdent == paper.owner,
             'answers': json.loads(paper.answer)
         }
 
         return json_res(data=response)
 
 
-def setPaperName(paper_id, new_name, token):
+def setPaperName(paper_id, new_name, userIdent):
     """
     命名试卷名称
 
@@ -83,7 +86,7 @@ def setPaperName(paper_id, new_name, token):
     * token：所有者密钥
     """
     paper = Paper.query.get(paper_id)
-    if token == paper.owner:
+    if userIdent == paper.owner:
         try:
             paper.paper_name = new_name
             db.session.commit()
@@ -94,16 +97,16 @@ def setPaperName(paper_id, new_name, token):
         return json_res(msg='你不是该试卷的所有者，无法改动试卷数据！', code=1)
 
 
-def updatePaperOwner(paper_id, token):
+def updatePaperOwner(paper_id, userIdent):
     """
     为试卷设定/更新所有者，为其后续提供修改权限
 
     * paper_id（试卷号）
-    * token（用户Token）
+    * userIdent（用户识别码）
     """
     try:
         paper = Paper.query.get(paper_id)
-        paper.owner = token
+        paper.owner = userIdent
         db.session.commit()
     except Exception as e:
         print(e)
@@ -127,8 +130,7 @@ def getPaperList(limit, index):
         Paper.submit_time.desc()).limit(limit).offset(
             (index - 1) * limit).with_entities(
                 Paper.id, Paper.paper_name,
-                func.date_format(Paper.submit_time,
-                                 "%Y年%m月%d日 %H时%i分%s秒")).all()
+                func.date_format(Paper.submit_time, "%Y年%m月%d日 %H时%i分")).all()
     total = Paper.query.count()
     data = []
     for result in results:
