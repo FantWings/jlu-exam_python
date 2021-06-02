@@ -20,4 +20,4 @@ class Config(object):
     PERMANENT_SESSION_LIFETIME = timedelta(days=31)
 
     # 开启SQLALCHEMY哆嗦模式
-    SQLALCHEMY_ECHO = True
+    SQLALCHEMY_ECHO = os.getenv('SQL_ECHO', False)
