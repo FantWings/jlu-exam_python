@@ -5,7 +5,8 @@ from sqlalchemy import func
 from sql.model import db
 from sql.tables.t_paper import Paper
 from lib.response import json_res
-from lib.answer import getAnswers
+# from lib.answer import getAnswers
+from lib.artifact import getAnswers
 
 
 def addPapers(paper_data, userIdent):
@@ -73,7 +74,6 @@ def getPapers(paper_id, userIdent):
             'isOwner': userIdent == paper.owner,
             'answers': json.loads(paper.answer)
         }
-
         return json_res(data=response)
 
 
