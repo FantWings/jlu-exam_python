@@ -27,7 +27,7 @@ def addPapers(paper_data, userIdent):
         try:
             # 调用答案解析函数，解析答案，存储到变量
             try:
-                answers = getAnswers(paper_data)
+                getAnswers(paper_data['data']['questions'])
             except Exception:
                 return json_res(msg='你输入的试卷数据不正确或试卷数据不完整，解析失败！', code=1)
 
@@ -36,7 +36,6 @@ def addPapers(paper_data, userIdent):
                               submit_ip=paper_data['data']['sourceIp'],
                               original=json.dumps(
                                   paper_data['data']['questions']),
-                              answer=json.dumps(answers),
                               owner=userIdent)
             db.session.add(new_paper)
             db.session.commit()
@@ -72,7 +71,7 @@ def getPapers(paper_id, userIdent):
             'submit_time':
             int(time.mktime(paper.submit_time.timetuple())) * 1000,
             'isOwner': userIdent == paper.owner,
-            'answers': json.loads(paper.answer)
+            'answers': getAnswers(json.loads(paper.original))
         }
         return json_res(data=response)
 

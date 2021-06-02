@@ -15,7 +15,7 @@ def getAnswers(originalData):
     pattern = re.compile(r'<[^>]+>', re.S)
 
     # 处理答案
-    for question in originalData['data']['questions']:
+    for question in originalData:
         # 检测字典内有没有这个题型，没有就创建一个并赋予一个空数组
         if not answers.get(question['questiontypename']):
             answers[question['questiontypename']] = []
