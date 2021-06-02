@@ -74,7 +74,6 @@ def getPapers(paper_id, userIdent):
             'isOwner': userIdent == paper.owner,
             'answers': json.loads(paper.answer)
         }
-
         return json_res(data=response)
 
 

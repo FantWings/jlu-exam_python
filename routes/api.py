@@ -43,7 +43,6 @@ def paper(paper_id):
         # 更新这张试卷的所有者
         Oprater.updatePaperOwner(paper_id, userIdent)
         # 处理完成，返回试卷号给前端
-        print(answers)
         return make_response(answers)
 
 
