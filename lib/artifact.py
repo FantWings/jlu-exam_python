@@ -20,12 +20,16 @@ def getAnswers(originalData):
         if not answers.get(question['questiontypename']):
             answers[question['questiontypename']] = []
 
+        options = []
+        for option in question.get('answerArea').get('optionList'):
+            options.append(pattern.sub('', option.get('content')))
+
         # 定义答案常量，将答案从原始数据中取出，进行完形填空
         const = dict(
             id=question.get('questionId', None),
             type=question.get('questiontypename', None),
-            answer=[question.get('answer', None)],
-            options=question.get('answerArea').get('optionList'),
+            answer=question.get('answer', None),
+            options=options,
             question=pattern.sub('', question.get('stem')),
         )
 
