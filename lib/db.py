@@ -1,5 +1,5 @@
-import json
-import time
+from json import loads, dumps
+from time import mktime
 from sqlalchemy import func
 
 from sql.model import db
@@ -33,8 +33,7 @@ def addPapers(paper_data, userIdent):
             # 将试卷号、提交者IP地址、原试卷数据、答案数据写入数据库
             new_paper = Paper(id=paper_id,
                               submit_ip=paper_data['data']['sourceIp'],
-                              original=json.dumps(
-                                  paper_data['data']['questions']),
+                              original=dumps(paper_data['data']['questions']),
                               owner=userIdent)
             db.session.add(new_paper)
             db.session.commit()
@@ -67,10 +66,9 @@ def getPapers(paper_id, userIdent):
         response = {
             'paper_id': paper.id,
             'paper_name': paper.paper_name,
-            'submit_time':
-            int(time.mktime(paper.submit_time.timetuple())) * 1000,
+            'submit_time': int(mktime(paper.submit_time.timetuple())) * 1000,
             'isOwner': userIdent == paper.owner,
-            'answers': getAnswers(json.loads(paper.original))
+            'answers': getAnswers(loads(paper.original))
         }
         return json_res(data=response)
 
