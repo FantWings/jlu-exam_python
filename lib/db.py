@@ -5,7 +5,6 @@ from sqlalchemy import func
 from sql.model import db
 from sql.tables.t_paper import Paper
 from lib.response import json_res
-# from lib.answer import getAnswers
 from lib.artifact import getAnswers
 
 
