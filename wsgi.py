@@ -1,20 +1,32 @@
-from flask import Flask
-from flask_cors import CORS
+import gunicorn.app.base
+import gunicorn.glogging
+import gunicorn.workers.sync
+from app import app
 
-from settings import Config
-from sql.model import db
-from routes.api import api
 
-app = Flask(__name__)
-app.config.from_object(Config)
+class StandaloneApplication(gunicorn.app.base.BaseApplication):
+    def __init__(self, app, options=None):
+        self.options = options or {}
+        self.application = app
+        super().__init__()
 
-with app.app_context():
-    db.init_app(app)
-    db.create_all()
+    def load_config(self):
+        config = {
+            key: value
+            for key, value in self.options.items()
+            if key in self.cfg.settings and value is not None
+        }
+        for key, value in config.items():
+            self.cfg.set(key.lower(), value)
 
-CORS(app, supports_credentials=True)
+    def load(self):
+        return self.application
 
-app.register_blueprint(blueprint=api, url_prefix='/api')
 
-if __name__ == "__main__":
-    app.run(host='0.0.0.0', port=9090)
+if __name__ == '__main__':
+    options = {
+        'bind': '0.0.0.0:9090',
+        'preload': True,
+        'workers': 3,
+    }
+    StandaloneApplication(app, options).run()
