@@ -1,4 +1,4 @@
-from re import compile
+from re import compile, S
 
 
 def getAnswers(originalData):
