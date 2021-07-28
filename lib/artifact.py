@@ -12,7 +12,7 @@ def getAnswers(originalData):
     answers = {}
 
     # 预定义正则表达式，用于清理题目上乱七八糟的杂项数据
-    pattern = compile(r'<[^>]+>', re.S)
+    pattern = compile(r'<[^>]+>', S)
 
     # 处理答案
     for question in originalData:
